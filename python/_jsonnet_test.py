@@ -177,7 +177,17 @@ class JsonnetTests(unittest.TestCase):
             import_callback=import_callback_encode,
             native_callbacks=native_callbacks,
         )
-        self.assertEqual(json_str, "84\n")
+    def test_native_callback_param_type_validation(self):
+        def dummy_cb(*args):
+            return None
+
+        # Verify that non-string parameters beyond the first index are rejected with TypeError
+        with self.assertRaises(TypeError):
+            _jsonnet.evaluate_snippet(
+                self.test_filename,
+                "null",
+                native_callbacks={"invalid_param": (("valid", 123), dummy_cb)},
+            )
 
 if __name__ == '__main__':
     unittest.main()

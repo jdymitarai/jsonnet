@@ -411,7 +411,7 @@ static int handle_native_callbacks(struct JsonnetVm *vm, PyObject *native_callba
         /* Check the params are all strings */
         num_params = PyTuple_Size(params);
         for (i = 0; i < num_params ; ++i) {
-            PyObject *param = PyTuple_GetItem(params, 0);
+            PyObject *param = PyTuple_GetItem(params, i);
             if (!PyUnicode_Check(param)) {
                 PyErr_SetString(PyExc_TypeError, "native callback param must be string");
                 goto bad;
