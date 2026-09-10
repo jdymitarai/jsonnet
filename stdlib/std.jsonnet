@@ -613,15 +613,18 @@ limitations under the License.
 
     // Render floating point in scientific form
     local render_float_sci(n__, zero_pad, blank, plus, ensure_pt, trailing, caps, prec) =
-      local exponent = if n__ == 0 then 0 else std.floor(std.log(std.abs(n__)) / std.log(10));
-      local suff = (if caps then 'E' else 'e')
-                   + render_int(exponent < 0, std.abs(exponent), 3, 0, false, true, 10, '');
-      local mantissa = if exponent == -324 then
+      local initial_exp = if n__ == 0 then 0 else std.floor(std.log(std.abs(n__)) / std.log(10));
+      local initial_mantissa = if initial_exp == -324 then
         // Avoid a rounding error where std.pow(10, -324) is 0
         // -324 is the smallest exponent possible.
-        n__ * 10 / std.pow(10, exponent + 1)
+        n__ * 10 / std.pow(10, initial_exp + 1)
       else
-        n__ / std.pow(10, exponent);
+        n__ / std.pow(10, initial_exp);
+      local carry = n__ != 0 && (std.floor(std.abs(initial_mantissa) * std.pow(10, prec) + 0.5) >= 10 * std.pow(10, prec));
+      local exponent = if carry then initial_exp + 1 else initial_exp;
+      local mantissa = if carry then initial_mantissa / 10 else initial_mantissa;
+      local suff = (if caps then 'E' else 'e')
+                   + render_int(exponent < 0, std.abs(exponent), 3, 0, false, true, 10, '');
       local zp2 = zero_pad - std.length(suff);
       render_float_dec(mantissa, zp2, blank, plus, ensure_pt, trailing, prec) + suff;
 
@@ -688,8 +691,16 @@ limitations under the License.
           error 'Format required number at '
                 + i + ', got ' + std.type(val)
         else
-          local exponent = if val != 0 then std.floor(std.log(std.abs(val)) / std.log(10)) else 0;
-          if exponent < -4 || exponent >= fpprec then
+          // Per Python formatting rules, a precision of 0 is treated as 1.
+          local gprec = if prec_or_null != null then std.max(1, prec_or_null) else 6;
+          local initial_exp = if val != 0 then std.floor(std.log(std.abs(val)) / std.log(10)) else 0;
+          local initial_mantissa = if initial_exp == -324 then
+            val * 10 / std.pow(10, initial_exp + 1)
+          else
+            val / std.pow(10, initial_exp);
+          local carry = val != 0 && (std.floor(std.abs(initial_mantissa) * std.pow(10, gprec - 1) + 0.5) >= 10 * std.pow(10, gprec - 1));
+          local exponent = if carry then initial_exp + 1 else initial_exp;
+          if exponent < -4 || exponent >= gprec then
             render_float_sci(val,
                              zp,
                              cflags.blank,
@@ -697,16 +708,16 @@ limitations under the License.
                              cflags.alt,
                              cflags.alt,
                              code.caps,
-                             fpprec - 1)
+                             gprec - 1)
           else
-            local digits_before_pt = std.max(1, exponent + 1);
+            local dec_prec = if exponent >= 0 then gprec - (exponent + 1) else gprec - exponent - 1;
             render_float_dec(val,
                              zp,
                              cflags.blank,
                              cflags.plus,
                              cflags.alt,
                              cflags.alt,
-                             fpprec - digits_before_pt)
+                             dec_prec)
       else if code.ctype == 'c' then
         if std.type(val) == 'number' then
           std.char(val)

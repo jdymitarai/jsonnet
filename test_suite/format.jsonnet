@@ -158,6 +158,8 @@ std.assertEqual(std.format('%e', [910]), '9.100000e+02') &&
 std.assertEqual(std.format('%e', [0]), '0.000000e+00') &&
 std.assertEqual(std.format('%.0le', [910]), '9e+02') &&
 std.assertEqual(std.format('%.0le', [0]), '0e+00') &&
+std.assertEqual(std.format('%.0e', [9.5e10]), '1e+11') &&
+std.assertEqual(std.format('%.1e', [9.99]), '1.0e+01') &&
 std.assertEqual(std.format('%#e', [-910]), '-9.100000e+02') &&
 std.assertEqual(std.format('%16e', [910]), '    9.100000e+02') &&
 std.assertEqual(std.format('%016e', [910]), '00009.100000e+02') &&
@@ -179,6 +181,8 @@ std.assertEqual(std.type(std.format('%e', [3.94066e-324])), 'string') &&
 // E
 std.assertEqual(std.format('%E', [910]), '9.100000E+02') &&
 std.assertEqual(std.format('%.0lE', [910]), '9E+02') &&
+std.assertEqual(std.format('%.0E', [9.5e10]), '1E+11') &&
+std.assertEqual(std.format('%.1E', [9.99]), '1.0E+01') &&
 std.assertEqual(std.format('%#E', [-910]), '-9.100000E+02') &&
 std.assertEqual(std.format('%16E', [910]), '    9.100000E+02') &&
 std.assertEqual(std.format('%016E', [910]), '00009.100000E+02') &&
@@ -218,6 +222,11 @@ std.assertEqual(std.format('%.4f', [0.99995]), '1.0000') &&
 // g
 
 std.assertEqual(std.format('%g', [0]), '0') &&
+std.assertEqual(std.format('%.0g', [1.0]), '1') &&
+std.assertEqual(std.format('%+.0g', [1.0]), '+1') &&
+std.assertEqual(std.format('%.0g', [0.1]), '0.1') &&
+std.assertEqual(std.format('%.1g', [9.9]), '1e+01') &&
+std.assertEqual(std.format('%.2g', [99.9]), '1e+02') &&
 std.assertEqual(std.format('%#.3g', [1000000001]), '1.00e+09') &&
 std.assertEqual(std.format('%#.3g', [1100]), '1.10e+03') &&
 std.assertEqual(std.format('%#.3g', [1.1]), '1.10') &&
@@ -252,6 +261,11 @@ std.assertEqual(std.format('%10.5g', [1.1]), '       1.1') &&
 
 // G
 std.assertEqual(std.format('%G', [0]), '0') &&
+std.assertEqual(std.format('%.0G', [1.0]), '1') &&
+std.assertEqual(std.format('%+.0G', [1.0]), '+1') &&
+std.assertEqual(std.format('%.0G', [0.1]), '0.1') &&
+std.assertEqual(std.format('%.1G', [9.9]), '1E+01') &&
+std.assertEqual(std.format('%.2G', [99.9]), '1E+02') &&
 std.assertEqual(std.format('%#.3G', [1000000001]), '1.00E+09') &&
 std.assertEqual(std.format('%#.3G', [1100]), '1.10E+03') &&
 std.assertEqual(std.format('%#.3G', [1.1]), '1.10') &&
